@@ -13,7 +13,7 @@ The design emphasizes **network isolation** (separate Docker networks) and a cle
 
 ## Diagram
 
-The main architecture diagram is in:
+The main architecture diagram:
 ![Homelab design layout](design_layout.svg)
 
 It highlights:
