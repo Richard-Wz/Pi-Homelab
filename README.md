@@ -15,7 +15,6 @@ The design emphasizes **network isolation** (separate Docker networks) and a cle
 
 The main architecture diagram:
 ![Homelab design layout](design_layout.svg)
-
 It highlights:
 - Clients (phone / laptop) using **Tailscale**
 - Docker services and **network segmentation**
