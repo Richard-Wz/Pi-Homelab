@@ -1,0 +1,14 @@
+# Secrets
+.env
+
+# Local notes / messy docs
+nvmepi.txt
+
+# Scratch / drawings
+drawing/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp

@@ -1,0 +1,188 @@
+services:
+
+# Portainer Container
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - frontend_net
+
+# Nextcloud Container
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - nextcloud_data:/var/www/html
+      - ./data/downloads:/external/downloads:ro
+    environment:
+      - MYSQL_HOST=nextcloud_db
+      - MYSQL_DATABASE=${NEXTCLOUD_DB_NAME}
+      - MYSQL_USER=${NEXTCLOUD_DB_USER}
+      - MYSQL_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
+    depends_on:
+      - nextcloud_db
+    networks:
+      - frontend_net
+      - db_net
+
+# Nextcloud Database Container - MySQL
+  nextcloud_db:
+    image: mariadb:11.8
+    container_name: nextcloud_db
+    restart: unless-stopped
+    volumes:
+      - nextcloud_db_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${NEXTCLOUD_DB_NAME}
+      - MYSQL_USER=${NEXTCLOUD_DB_USER}
+      - MYSQL_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
+    networks:
+      # Isolated database network, only Nextcloud can reach it
+      - db_net
+
+# qBittorrent
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    ports:
+      - "8090:8090"      # WebUi Port
+      - "6881:6881"      # Torrent TCP
+      - "6881:6881/udp"  # Torrent UDP
+    volumes:
+      - qbittorrent_config:/config
+      - ./data/downloads:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kuala_Lumpur
+      - WEBUI_PORT=8090
+    networks:
+      # Isolated Torrent Network
+      - download_net
+
+
+# Networks Section
+networks:
+  frontend_net:
+    driver: bridge
+  db_net:
+    driver: bridge
+    internal: true     # DB only talks internally
+  download_net:
+    driver: bridge
+
+# Volumes Section
+volumes:
+  portainer_data:
+  nextcloud_data:
+  nextcloud_db_data:
+  qbittorrent_config:
+rj@rpi:~/docker/main $ btop
+rj@rpi:~/docker/main $ ls
+data  docker-compose.yaml
+rj@rpi:~/docker/main $ ls -a
+.  ..  data  docker-compose.yaml  .env
+rj@rpi:~/docker/main $ cat docker-compose.yaml
+services:
+
+# Portainer Container
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - frontend_net
+
+# Nextcloud Container
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - nextcloud_data:/var/www/html
+      - ./data/downloads:/external/downloads:ro
+    environment:
+      - MYSQL_HOST=nextcloud_db
+      - MYSQL_DATABASE=${NEXTCLOUD_DB_NAME}
+      - MYSQL_USER=${NEXTCLOUD_DB_USER}
+      - MYSQL_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
+    depends_on:
+      - nextcloud_db
+    networks:
+      - frontend_net
+      - db_net
+
+# Nextcloud Database Container - MySQL
+  nextcloud_db:
+    image: mariadb:11.8
+    container_name: nextcloud_db
+    restart: unless-stopped
+    volumes:
+      - nextcloud_db_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${NEXTCLOUD_DB_NAME}
+      - MYSQL_USER=${NEXTCLOUD_DB_USER}
+      - MYSQL_PASSWORD=${NEXTCLOUD_DB_PASSWORD}
+    networks:
+      # Isolated database network, only Nextcloud can reach it
+      - db_net
+
+# qBittorrent
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    ports:
+      - "8090:8090"      # WebUi Port
+      - "6881:6881"      # Torrent TCP
+      - "6881:6881/udp"  # Torrent UDP
+    volumes:
+      - qbittorrent_config:/config
+      - ./data/downloads:/downloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kuala_Lumpur
+      - WEBUI_PORT=8090
+    networks:
+      # Isolated Torrent Network
+      - download_net
+
+
+# Networks Section
+networks:
+  frontend_net:
+    driver: bridge
+  db_net:
+    driver: bridge
+    internal: true     # DB only talks internally
+  download_net:
+    driver: bridge
+
+# Volumes Section
+volumes:
+  portainer_data:
+  nextcloud_data:
+  nextcloud_db_data:
+  qbittorrent_config:
